@@ -6,19 +6,18 @@ services:
     ports:
       - "4000:4000"
     environment:
-      # Single parameter for model (base or fine-tuned).
-      # If unset, defaults to gpt-4o-mini at runtime.
-      # MODEL_ID: "ft:gpt-4o-mini-2025:org_123:custom:xyz789"
       OPENAI_API_KEY: "sk-REPLACE_ME"
 
-      # Optional (file_search): comma-separated list
-      VECTOR_STORE_IDS: "vs_XXXXXXXX"
+      # Single model param (base or fine-tuned).
+      # If unset, defaults to gpt-4o-mini at runtime.
+      # MODEL_ID: "ft:gpt-4o-mini-2025:org_123:my-model:xyz"
 
-      # Optional (MCP)
-      MCP_BASE_URL: "https://your-mcp.example.com"
-      MCP_PATH: "/v1/router"
-      MCP_SERVER_LABEL: "my_mcp"
-      MCP_HEADERS_JSON: '{"Authorization":"Bearer YOUR_MCP_TOKEN"}'
+      # Optional file search: comma-separated
+      # VECTOR_STORE_IDS: "vs_XXXX,vs_YYYY"
+
+      # Optional MCP: full server URL as single variable
+      # MCP_URL: "https://my-mcp.example.com/api"
+      # MCP_HEADERS_JSON: '{"Authorization":"Bearer xyz"}'
 
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:4000/health || exit 1"]

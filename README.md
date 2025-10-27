@@ -1,28 +1,23 @@
-# OpenAI Proxy — single MODEL_ID (soft default)
+# OpenAI Proxy (MODEL_ID + MCP_URL)
 
-## Model selection
-- Set a single env var `MODEL_ID` to either a base model (e.g. `gpt-4o-mini`) or your fine-tuned id (e.g. `ft:gpt-4o-mini-2025:org_123:custom:xyz789`).
-- If `MODEL_ID` is **not** set, the proxy will default to `gpt-4o-mini` at runtime (soft default).
+✅ Auto-injects file_search & MCP tools
+✅ Single MODEL_ID (base or fine-tuned), soft-default to gpt-4o-mini
+✅ Single MCP_URL for MCP integration
+✅ GHCR image: ghcr.io/lsfusion/openai-proxy
 
-## Quick start
-1) Edit `docker-compose.yml` and set `OPENAI_API_KEY`. Optionally set `MODEL_ID`, `VECTOR_STORE_IDS`, MCP vars.
-2) Run:
-   ```bash
-   docker compose up -d --build
-   ```
-3) Proxy: `http://localhost:4000`
+## Quick run
+```bash
+OPENAI_API_KEY="sk-..." docker compose up -d --build
+```
 
-### Examples
-- Base model:
-  ```bash
-  MODEL_ID="gpt-4o-mini" OPENAI_API_KEY="sk-..." docker compose up -d --build
-  ```
-- Fine-tuned:
-  ```bash
-  MODEL_ID="ft:gpt-4o-mini-2025:org_123:custom:xyz789" OPENAI_API_KEY="sk-..." docker compose up -d --build
-  ```
+## Example: fine-tuned
+```bash
+MODEL_ID="ft:gpt-4o-mini-2025:org_xyz:cool:123"     OPENAI_API_KEY="sk-..."     docker compose up -d --build
+```
 
-## Notes
-- Tools auto-selection is on (`tool_choice: "auto"`). `file_search` & MCP are injected by `inject_tools.py`.
-- `VECTOR_STORE_IDS`: comma-separated vector store IDs.
-- MCP endpoint is parameterized by `MCP_BASE_URL` + `MCP_PATH`; headers via `MCP_HEADERS_JSON` (JSON object).
+## Example: enable file search & MCP
+```bash
+MODEL_ID="gpt-4o-mini"     VECTOR_STORE_IDS="vs_123,vs_456"     MCP_URL="https://my-mcp.example.com/api"     MCP_HEADERS_JSON='{"Authorization":"Bearer XYZ"}'     OPENAI_API_KEY="sk-..."     docker compose up -d --build
+```
+
+Proxy available at: http://localhost:4000
