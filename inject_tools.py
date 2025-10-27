@@ -16,7 +16,7 @@ def _mcp_server_def() -> Dict[str, Any]:
     # build MCP server config
     url = _env("MCP_URL", "")
     headers_json = _env("MCP_HEADERS_JSON", "")
-    headers = {}
+    headers: Dict[str, str] = {}
 
     if headers_json:
         try:
@@ -28,12 +28,15 @@ def _mcp_server_def() -> Dict[str, Any]:
 
     return {
         "servers": {
-            # default key name inside tool definition
             "default_mcp": {"server_url": url, "headers": headers}
         }
     }
 
 class InjectToolsGuardrail:
+    def __init__(self, *args, **kwargs):
+        # accept constructor args from LiteLLM (guardrail_name, mode, etc.)
+        pass
+
     # hook to modify model request before API call
     async def async_pre_call_hook(self, model: str, messages: List[Dict[str, Any]], kwargs: Dict[str, Any], **_):
         tools = kwargs.get("tools", [])
@@ -47,10 +50,9 @@ class InjectToolsGuardrail:
                 "file_search": {"vector_store_ids": vs_ids}
             })
 
-        # mcp tool
+        # mcp tool (avoid duplicates with same URL)
         mcp_url = _env("MCP_URL")
         if mcp_url:
-            # detect existing mcp tool with same server_url
             has_same_mcp = False
             for t in tools:
                 if t.get("type") == "mcp":
@@ -61,17 +63,15 @@ class InjectToolsGuardrail:
                             break
                 if has_same_mcp:
                     break
-
             if not has_same_mcp:
                 tools.append({
                     "type": "mcp",
                     "mcp": _mcp_server_def()
                 })
 
-        # write back modified tools
         if tools:
             kwargs["tools"] = tools
             kwargs.setdefault("tool_choice", "auto")
 
-        # must return messages + kwargs
+        # must return both messages and kwargs
         return {"messages": messages, "kwargs": kwargs}
