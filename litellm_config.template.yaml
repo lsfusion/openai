@@ -2,9 +2,8 @@ model_list:
   - model_name: __MODEL_ID__
     litellm_params:
       model: __MODEL_ID__
+      modify_params: true
 #      api_key: os.environ/OPENAI_API_KEY
-
-modify_params: true
 
 guardrails:
   - type: custom
