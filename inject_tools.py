@@ -1,16 +1,19 @@
 # inject_tools.py
 import os, json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List
 
 def _env(name: str, default: str = "") -> str:
+    # get env var as trimmed string
     v = os.environ.get(name, default)
     return v.strip() if isinstance(v, str) else default
 
-def _vector_store_ids() -> list[str]:
+def _vector_store_ids() -> List[str]:
+    # return VECTOR_STORE_IDS as list[str]
     raw = _env("VECTOR_STORE_IDS", "")
     return [x.strip() for x in raw.split(",") if x.strip()]
 
 def _mcp_server_def() -> Dict[str, Any]:
+    # build MCP server config
     url = _env("MCP_URL", "")
     headers_json = _env("MCP_HEADERS_JSON", "")
     headers = {}
@@ -19,34 +22,56 @@ def _mcp_server_def() -> Dict[str, Any]:
         try:
             val = json.loads(headers_json)
             if isinstance(val, dict):
-                headers = val
+                headers = {str(k): str(v) for k, v in val.items()}
         except Exception:
             pass
 
     return {
         "servers": {
-            "default_mcp": { "server_url": url, "headers": headers }
+            # default key name inside tool definition
+            "default_mcp": {"server_url": url, "headers": headers}
         }
     }
 
 class InjectToolsGuardrail:
-    async def async_pre_call_hook(self, model: str, messages: list[dict], kwargs: Dict[str, Any], **_):
+    # hook to modify model request before API call
+    async def async_pre_call_hook(self, model: str, messages: List[Dict[str, Any]], kwargs: Dict[str, Any], **_):
         tools = kwargs.get("tools", [])
-        existing = {t.get("type") for t in tools}
+        existing = {t.get("type") for t in tools if isinstance(t, dict)}
 
+        # vector-search tool
         vs_ids = _vector_store_ids()
         if vs_ids and "file_search" not in existing:
             tools.append({
                 "type": "file_search",
-                "file_search": { "vector_store_ids": vs_ids }
+                "file_search": {"vector_store_ids": vs_ids}
             })
 
-        if _env("MCP_URL") and "mcp" not in existing:
-            tools.append({
-                "type": "mcp",
-                "mcp": _mcp_server_def()
-            })
+        # mcp tool
+        mcp_url = _env("MCP_URL")
+        if mcp_url:
+            # detect existing mcp tool with same server_url
+            has_same_mcp = False
+            for t in tools:
+                if t.get("type") == "mcp":
+                    servers = t.get("mcp", {}).get("servers", {})
+                    for s in servers.values():
+                        if s.get("server_url") == mcp_url:
+                            has_same_mcp = True
+                            break
+                if has_same_mcp:
+                    break
 
-        kwargs["tools"] = tools
-        kwargs.setdefault("tool_choice", "auto")
-        return kwargs
+            if not has_same_mcp:
+                tools.append({
+                    "type": "mcp",
+                    "mcp": _mcp_server_def()
+                })
+
+        # write back modified tools
+        if tools:
+            kwargs["tools"] = tools
+            kwargs.setdefault("tool_choice", "auto")
+
+        # must return messages + kwargs
+        return {"messages": messages, "kwargs": kwargs}

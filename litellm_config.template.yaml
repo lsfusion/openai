@@ -6,9 +6,8 @@ model_list:
 #      api_key: os.environ/OPENAI_API_KEY
 
 guardrails:
-  - type: custom
-    name: InjectToolsGuardrail
-    path: /app/inject_tools.py
-    position: pre_api_call
+  - guardrail_name: "inject-tools"
     litellm_params:
-      model: __MODEL_ID__
+      guardrail: inject_tools.InjectToolsGuardrail
+      mode: "pre_call"
+      default_on: true
