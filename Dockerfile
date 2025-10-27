@@ -7,4 +7,4 @@ COPY run.sh /app/
 RUN chmod +x /app/run.sh
 
 EXPOSE 4000
-CMD ["/app/run.sh"]
+ENTRYPOINT ["/app/run.sh"]
