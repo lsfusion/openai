@@ -9,3 +9,6 @@ guardrails:
   - type: custom
     name: InjectToolsGuardrail
     path: /app/inject_tools.py
+    position: pre_api_call
+    litellm_params:
+      model: __MODEL_ID__
