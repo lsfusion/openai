@@ -3,6 +3,8 @@ model_list:
     litellm_params:
       model: __MODEL_ID__
       modify_params: true
+      drop_params:
+        - modify_params
 #      api_key: os.environ/OPENAI_API_KEY
 
 guardrails:
