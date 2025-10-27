@@ -1,0 +1,12 @@
+model_list:
+  - model_name: __MODEL_ID__
+    litellm_params:
+      model: openai/__MODEL_ID__
+      api_key: os.environ/OPENAI_API_KEY
+
+modify_params: true
+
+guardrails:
+  - type: custom
+    name: InjectToolsGuardrail
+    path: /app/inject_tools.py

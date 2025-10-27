@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  proxy:
+    build: .
+    image: ghcr.io/OWNER/openai-proxy:latest
+    ports:
+      - "4000:4000"
+    environment:
+      # Single parameter for model (base or fine-tuned).
+      # If unset, defaults to gpt-4o-mini at runtime.
+      # MODEL_ID: "ft:gpt-4o-mini-2025:org_123:custom:xyz789"
+      OPENAI_API_KEY: "sk-REPLACE_ME"
+
+      # Optional (file_search): comma-separated list
+      VECTOR_STORE_IDS: "vs_XXXXXXXX"
+
+      # Optional (MCP)
+      MCP_BASE_URL: "https://your-mcp.example.com"
+      MCP_PATH: "/v1/router"
+      MCP_SERVER_LABEL: "my_mcp"
+      MCP_HEADERS_JSON: '{"Authorization":"Bearer YOUR_MCP_TOKEN"}'
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4000/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
