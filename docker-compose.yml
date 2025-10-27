@@ -2,7 +2,7 @@ version: "3.9"
 services:
   proxy:
     build: .
-    image: ghcr.io/OWNER/openai-proxy:latest
+    image: ghcr.io/lsfusion/openai:latest
     ports:
       - "4000:4000"
     environment:
