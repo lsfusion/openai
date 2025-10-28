@@ -1,10 +1,11 @@
 import os, json, logging
 from typing import Dict, Any
 
-import litellm
 from litellm.integrations.custom_logger import CustomLogger
-from litellm import completion, acompletion
-
+import litellm
+from litellm.proxy.proxy_server import UserAPIKeyAuth, DualCache
+from litellm.types.utils import ModelResponseStream
+from typing import Any, AsyncGenerator, Optional, Literal
 
 log = logging.getLogger("inject_tools_cb")
 if not log.handlers:
@@ -72,32 +73,51 @@ class InjectToolsCallback(CustomLogger):
 
         return data
 
-    # --- no-op stubs so LiteLLM doesn't crash when calling them ---
-    async def async_post_call_success_hook(self, *args, **kwargs):
-        # do nothing, just allow proxy to proceed
-        return None
+    async def async_post_call_failure_hook(
+            self,
+            request_data: dict,
+            original_exception: Exception,
+            user_api_key_dict: UserAPIKeyAuth,
+            traceback_str: Optional[str] = None,
+    ):
+        pass
 
-    async def async_moderation_hook(self, *args, **kwargs):
-        # not moderating here
-        return None
+    async def async_post_call_success_hook(
+            self,
+            data: dict,
+            user_api_key_dict: UserAPIKeyAuth,
+            response,
+    ):
+        pass
 
-    async def async_post_call_streaming_iterator_hook(self, *args, **kwargs):
+    async def async_moderation_hook( # call made in parallel to llm api call
+            self,
+            data: dict,
+            user_api_key_dict: UserAPIKeyAuth,
+            call_type: Literal["completion", "embeddings", "image_generation", "moderation", "audio_transcription"],
+    ):
+        pass
+
+    async def async_post_call_streaming_hook(
+            self,
+            user_api_key_dict: UserAPIKeyAuth,
+            response: str,
+    ):
+        pass
+
+    async def async_post_call_streaming_iterator_hook(
+            self,
+            user_api_key_dict: UserAPIKeyAuth,
+            response: Any,
+            request_data: dict,
+    ) -> AsyncGenerator[ModelResponseStream, None]:
         """
-        Pass-through for streaming. If LiteLLM gives us an async iterator in kwargs,
-        yield from it; else yield nothing (valid async generator).
+        Passes the entire stream to the guardrail
+
+        This is useful for plugins that need to see the entire stream.
         """
-        stream = (
-                kwargs.get("streaming_response")
-                or kwargs.get("response")
-                or kwargs.get("iterator")
-        )
-        if stream is not None:
-            async for chunk in stream:
-                yield chunk
-            return
-        # empty async generator fallback
-        if False:
-            yield None
+        async for item in response:
+            yield item
 
 # exported instance for litellm_settings.callbacks
 proxy_handler_instance = InjectToolsCallback()
