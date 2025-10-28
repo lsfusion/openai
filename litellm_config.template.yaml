@@ -1,7 +1,7 @@
 model_list:
   - model_name: __MODEL_ID__
     litellm_params:
-      model: openai/__MODEL_ID__
+      model: __MODEL_ID__
       force_user_to_declare_guardrails: false
 
 litellm_settings:
