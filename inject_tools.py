@@ -18,6 +18,9 @@ def _vector_store_ids():
 
 class InjectToolsCallback:
     async def async_pre_call_hook(self, user_api_key_dict, cache, data: Dict[str, Any], call_type: str):
+
+        log.info("Inject %s", call_type)
+
         # Only inject for Responses API
         if call_type != "responses":
             return data
