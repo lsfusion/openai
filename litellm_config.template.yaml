@@ -3,6 +3,9 @@ model_list:
     litellm_params:
       model: __MODEL_ID__
 #      api_key: os.environ/OPENAI_API_KEY
+      # force guardrails to apply automatically
+      force_user_to_declare_guardrails: false
+      use_litellm_proxy: true
 
 guardrails:
   - guardrail_name: "inject-tools"
