@@ -53,14 +53,8 @@ class InjectToolsCallback(CustomLogger):
             tools.append({
                 "type": "mcp",
                 "server_label": "dmcp",
-                "mcp": {
-                    "servers": {
-                        "default_mcp": {
-                            "server_url": mcp_url,
-                            "headers": {}
-                        }
-                    }
-                }
+                "server_url": mcp_url,
+                "require_approval": "never"
             })
             log.info("Added mcp tool server_url=%s", mcp_url)
 
