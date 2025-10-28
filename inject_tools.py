@@ -52,6 +52,7 @@ class InjectToolsCallback(CustomLogger):
         if mcp_url and "mcp" not in existing:
             tools.append({
                 "type": "mcp",
+                "server_label": "dmcp",
                 "mcp": {
                     "servers": {
                         "default_mcp": {
