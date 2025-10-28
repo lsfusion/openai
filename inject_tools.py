@@ -1,6 +1,11 @@
 import os, json, logging
 from typing import Dict, Any
 
+import litellm
+from litellm.integrations.custom_logger import CustomLogger
+from litellm import completion, acompletion
+
+
 log = logging.getLogger("inject_tools_cb")
 if not log.handlers:
     h = logging.StreamHandler()
@@ -16,7 +21,11 @@ def _vector_store_ids():
     raw = _env("VECTOR_STORE_IDS", "")
     return [x.strip() for x in raw.split(",") if x.strip()]
 
-class InjectToolsCallback:
+class InjectToolsCallback(CustomLogger):
+    # Class variables or attributes
+    def __init__(self):
+        pass
+
     async def async_pre_call_hook(self, user_api_key_dict, cache, data: Dict[str, Any], call_type: str):
 
         log.info("Inject %s", call_type)
