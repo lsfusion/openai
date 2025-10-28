@@ -60,5 +60,32 @@ class InjectToolsCallback:
 
         return data
 
-# ✅ ВАЖНО: LiteLLM ожидает instance, а не модуль
+    # --- no-op stubs so LiteLLM doesn't crash when calling them ---
+    async def async_post_call_success_hook(self, *args, **kwargs):
+        # do nothing, just allow proxy to proceed
+        return None
+
+    async def async_moderation_hook(self, *args, **kwargs):
+        # not moderating here
+        return None
+
+    async def async_post_call_streaming_iterator_hook(self, *args, **kwargs):
+        """
+        Pass-through for streaming. If LiteLLM gives us an async iterator in kwargs,
+        yield from it; else yield nothing (valid async generator).
+        """
+        stream = (
+                kwargs.get("streaming_response")
+                or kwargs.get("response")
+                or kwargs.get("iterator")
+        )
+        if stream is not None:
+            async for chunk in stream:
+                yield chunk
+            return
+        # empty async generator fallback
+        if False:
+            yield None
+
+# exported instance for litellm_settings.callbacks
 proxy_handler_instance = InjectToolsCallback()
