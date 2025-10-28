@@ -2,14 +2,7 @@ model_list:
   - model_name: __MODEL_ID__
     litellm_params:
       model: __MODEL_ID__
-      force_user_to_declare_guardrails: false
 
 litellm_settings:
   use_litellm_proxy: true
-
-guardrails:
-  - guardrail_name: "inject-tools"
-    litellm_params:
-      guardrail: inject_tools.InjectToolsGuardrail
-      mode: "pre_call"
-      default_on: true
+  callbacks: inject_t
