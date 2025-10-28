@@ -16,45 +16,49 @@ def _vector_store_ids():
     raw = _env("VECTOR_STORE_IDS", "")
     return [x.strip() for x in raw.split(",") if x.strip()]
 
-def async_pre_call_hook(user_api_key_dict, cache, data: Dict[str, Any], call_type: str):
-    # Only inject for Responses API
-    if call_type != "responses":
-        return data
+class InjectToolsCallback:
+    async def async_pre_call_hook(self, user_api_key_dict, cache, data: Dict[str, Any], call_type: str):
+        # Only inject for Responses API
+        if call_type != "responses":
+            return data
 
-    tools = list(data.get("tools", []))
-    existing = {t.get("type") for t in tools if isinstance(t, dict)}
+        tools = list(data.get("tools", []))
+        existing = {t.get("type") for t in tools if isinstance(t, dict)}
 
-    # add file_search
-    vs_ids = _vector_store_ids()
-    if vs_ids and "file_search" not in existing:
-        tools.append({
-            "type": "file_search",
-            "file_search": {"vector_store_ids": vs_ids}
-        })
-        log.info("Added file_search tool vector_store_ids=%s", vs_ids)
+        # add file_search
+        vs_ids = _vector_store_ids()
+        if vs_ids and "file_search" not in existing:
+            tools.append({
+                "type": "file_search",
+                "file_search": {"vector_store_ids": vs_ids}
+            })
+            log.info("Added file_search tool vector_store_ids=%s", vs_ids)
 
-    # add MCP
-    mcp_url = _env("MCP_URL", "")
-    if mcp_url and "mcp" not in existing:
-        tools.append({
-            "type": "mcp",
-            "mcp": {
-                "servers": {
-                    "default_mcp": {
-                        "server_url": mcp_url,
-                        "headers": {}
+        # add MCP
+        mcp_url = _env("MCP_URL", "")
+        if mcp_url and "mcp" not in existing:
+            tools.append({
+                "type": "mcp",
+                "mcp": {
+                    "servers": {
+                        "default_mcp": {
+                            "server_url": mcp_url,
+                            "headers": {}
+                        }
                     }
                 }
-            }
-        })
-        log.info("Added mcp tool server_url=%s", mcp_url)
+            })
+            log.info("Added mcp tool server_url=%s", mcp_url)
 
-    if tools:
-        data["tools"] = tools
-        data.setdefault("tool_choice", "auto")
+        if tools:
+            data["tools"] = tools
+            data.setdefault("tool_choice", "auto")
 
-    log.info("Injected for responses: %s", json.dumps(
-        {"types": [t.get("type") for t in tools], "tool_choice": data.get("tool_choice")}
-    ))
+        log.info("Injected for responses: %s", json.dumps(
+            {"types": [t.get("type") for t in tools], "tool_choice": data.get("tool_choice")}
+        ))
 
-    return data
+        return data
+
+# ✅ ВАЖНО: LiteLLM ожидает instance, а не модуль
+proxy_handler_instance = InjectToolsCallback()
