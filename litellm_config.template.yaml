@@ -1,11 +1,8 @@
 model_list:
   - model_name: __MODEL_ID__
     litellm_params:
-      model: __MODEL_ID__
-#      api_key: os.environ/OPENAI_API_KEY
-      # force guardrails to apply automatically
+      model: openai/__MODEL_ID__
       force_user_to_declare_guardrails: false
-      api_provider: openai
 
 litellm_settings:
   use_litellm_proxy: true
