@@ -6,3 +6,7 @@ model_list:
 litellm_settings:
   use_litellm_proxy: true
   callbacks: inject_tools.proxy_handler_instance
+
+mcp_servers:
+  url: os.environ/MCP_URL
+  transport: "http"
