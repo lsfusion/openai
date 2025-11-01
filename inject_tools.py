@@ -48,15 +48,15 @@ class InjectToolsCallback(CustomLogger):
             log.info("Added file_search tool vector_store_ids=%s", vs_ids)
 
         # add MCP
-        # mcp_url = _env("MCP_URL", "")
-        # if mcp_url and "mcp" not in existing:
-        #     tools.append({
-        #         "type": "mcp",
-        #         "server_label": "dmcp",
-        #         "server_url": mcp_url,
-        #         "require_approval": "never"
-        #     })
-        #     log.info("Added mcp tool server_url=%s", mcp_url)
+        mcp_url = _env("MCP_URL", "")
+        if mcp_url and "mcp" not in existing:
+            tools.append({
+                "type": "mcp",
+                "server_label": "dmcp",
+                "server_url": mcp_url,
+                "require_approval": "never"
+            })
+            log.info("Added mcp tool server_url=%s", mcp_url)
 
         if tools:
             data["tools"] = tools
