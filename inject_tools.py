@@ -31,24 +31,25 @@ class InjectToolsCallback(CustomLogger):
 
         log.info("Inject %s", call_type)
 
+        mcp_url = _env("MCP_URL", "")
+
         # Only inject for Responses API
-        if call_type != "aresponses":
+        if mcp_url == "" or call_type != "aresponses":
             return data
 
         tools = list(data.get("tools", []))
         existing = {t.get("type") for t in tools if isinstance(t, dict)}
 
         # add file_search
-        vs_ids = _vector_store_ids()
-        if vs_ids and "file_search" not in existing:
-            tools.append({
-                "type": "file_search",
-                "file_search": {"vector_store_ids": vs_ids}
-            })
-            log.info("Added file_search tool vector_store_ids=%s", vs_ids)
+        # vs_ids = _vector_store_ids()
+        # if vs_ids and "file_search" not in existing:
+        #     tools.append({
+        #         "type": "file_search",
+        #         "file_search": {"vector_store_ids": vs_ids}
+        #     })
+        #     log.info("Added file_search tool vector_store_ids=%s", vs_ids)
 
         # add MCP
-        mcp_url = _env("MCP_URL", "")
         if mcp_url and "mcp" not in existing:
             tools.append({
                 "type": "mcp",
