@@ -33,6 +33,8 @@ class InjectToolsCallback(CustomLogger):
 
         # Only inject for Responses API
         if call_type != "aresponses":
+            if data.get("stream", True):
+                data["stream"] = False
             return data
 
         tools = list(data.get("tools", []))
