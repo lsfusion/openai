@@ -22,6 +22,24 @@ def _vector_store_ids():
     raw = _env("VECTOR_STORE_IDS", "")
     return [x.strip() for x in raw.split(",") if x.strip()]
 
+_cached_system_prompt: Optional[str] = None
+
+def _system_prompt() -> str:
+    global _cached_system_prompt
+    if _cached_system_prompt is not None:
+        return _cached_system_prompt
+    path = os.path.join(os.path.dirname(__file__), "system.prompt")
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                _cached_system_prompt = f.read().strip()
+        else:
+            _cached_system_prompt = ""
+    except Exception as e:
+        log.warning("Failed to read system.prompt: %s", e)
+        _cached_system_prompt = ""
+    return _cached_system_prompt
+
 class InjectToolsCallback(CustomLogger):
     # Class variables or attributes
     def __init__(self):
@@ -32,6 +50,17 @@ class InjectToolsCallback(CustomLogger):
         log.info("Inject %s", call_type)
 
         mcp_url = _env("MCP_URL", "")
+
+        # Append cached system prompt (if any) to existing system message, or insert a new one.
+        sys_prompt = _system_prompt()
+        if sys_prompt:
+            msgs = data.get("messages", [])
+            sys_msg = next((m for m in msgs if isinstance(m, dict) and m.get("role") == "system"), None)
+            if sys_msg:
+                sys_msg["content"] = (sys_msg.get("content", "") + ("\n\n" if sys_msg.get("content") else "") + sys_prompt)
+            else:
+                msgs.insert(0, {"role": "system", "content": sys_prompt})
+            data["messages"] = msgs
 
         # Only inject for Responses API
         if mcp_url == "" or call_type != "aresponses":

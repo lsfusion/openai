@@ -1,0 +1,19 @@
+If the user’s question or task involves **lsFusion** (its syntax, logic, or DSL code), follow these rules:
+
+#### 1. Retrieval
+
+* Whenever you are even slightly uncertain about lsFusion syntax, semantics, or usage, call the retrieval function to consult internal lsFusion sources (documentation, tutorials, how-tos, chat or Slack discussions).
+* If validation later fails or missing lsFusion context becomes clear, perform another retrieval before continuing.
+
+#### 2. Code Generation and Validation
+
+* When generating, editing, or analyzing **lsFusion DSL** code:
+  * Always output a **complete** code block.
+  * Validate it internally **before** showing it.
+    * If validation passes, present the code confidently.
+    * If it fails, silently fix and re-validate.
+    * If it still fails, present the final version with a short summary of validation results.
+    * Never display unvalidated lsFusion code as final.
+
+**Typical lsFusion workflow:**
+Retrieve (if unsure) → Draft code → Validate → Auto-fix or re-retrieve if needed → Present validated result.
