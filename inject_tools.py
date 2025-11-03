@@ -49,11 +49,13 @@ class InjectToolsCallback(CustomLogger):
 
         log.info("Inject %s", call_type)
 
+        # Append cached system prompt (if any) to existing system message, or insert a new one.
+        sys_prompt = _system_prompt()
+        log.info("System prompt %s", sys_prompt)
+
         mcp_url = _env("MCP_URL", "")
 
         if mcp_url == "":
-            # Append cached system prompt (if any) to existing system message, or insert a new one.
-            sys_prompt = _system_prompt()
             if sys_prompt:
                 msgs = data.get("messages", [])
                 sys_msg = next((m for m in msgs if isinstance(m, dict) and m.get("role") == "system"), None)
