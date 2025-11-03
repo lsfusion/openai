@@ -51,19 +51,21 @@ class InjectToolsCallback(CustomLogger):
 
         mcp_url = _env("MCP_URL", "")
 
-        # Append cached system prompt (if any) to existing system message, or insert a new one.
-        sys_prompt = _system_prompt()
-        if sys_prompt:
-            msgs = data.get("messages", [])
-            sys_msg = next((m for m in msgs if isinstance(m, dict) and m.get("role") == "system"), None)
-            if sys_msg:
-                sys_msg["content"] = (sys_msg.get("content", "") + ("\n\n" if sys_msg.get("content") else "") + sys_prompt)
-            else:
-                msgs.insert(0, {"role": "system", "content": sys_prompt})
-            data["messages"] = msgs
+        if mcp_url == "":
+            # Append cached system prompt (if any) to existing system message, or insert a new one.
+            sys_prompt = _system_prompt()
+            if sys_prompt:
+                msgs = data.get("messages", [])
+                sys_msg = next((m for m in msgs if isinstance(m, dict) and m.get("role") == "system"), None)
+                if sys_msg:
+                    sys_msg["content"] = (sys_msg.get("content", "") + ("\n\n" if sys_msg.get("content") else "") + sys_prompt)
+                else:
+                    msgs.insert(0, {"role": "system", "content": sys_prompt})
+                data["messages"] = msgs
+            return data
 
         # Only inject for Responses API
-        if mcp_url == "" or call_type != "aresponses":
+        if call_type != "aresponses":
             return data
 
         tools = list(data.get("tools", []))
