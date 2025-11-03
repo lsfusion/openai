@@ -55,6 +55,8 @@ class InjectToolsCallback(CustomLogger):
 
         mcp_url = _env("MCP_URL", "")
 
+        log.info("Mcp_url %s", mcp_url)
+
         if mcp_url == "":
             if sys_prompt:
                 msgs = data.get("messages", [])
