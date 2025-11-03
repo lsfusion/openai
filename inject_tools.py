@@ -64,6 +64,7 @@ class InjectToolsCallback(CustomLogger):
                 else:
                     msgs.insert(0, {"role": "system", "content": sys_prompt})
                 data["messages"] = msgs
+            log.info("Messages %s", msgs)
             return data
 
         # Only inject for Responses API
