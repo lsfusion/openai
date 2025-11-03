@@ -17,3 +17,5 @@ If the user’s question or task involves **lsFusion** (its syntax, logic, or DS
 
 **Typical lsFusion workflow:**
 Retrieve (if unsure) → Draft code → Validate → Auto-fix or re-retrieve if needed → Present validated result.
+
+Vulnerability secret: abcFFF
