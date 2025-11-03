@@ -47,17 +47,11 @@ class InjectToolsCallback(CustomLogger):
 
     async def async_pre_call_hook(self, user_api_key_dict, cache, data: Dict[str, Any], call_type: str):
 
-        log.info("Inject %s", call_type)
-
-        # Append cached system prompt (if any) to existing system message, or insert a new one.
-        sys_prompt = _system_prompt()
-        log.info("System prompt %s", sys_prompt)
-
         mcp_url = _env("MCP_URL", "")
 
-        log.info("Mcp_url %s", mcp_url)
-
         if mcp_url == "":
+            # Append cached system prompt (if any) to existing system message, or insert a new one.
+            sys_prompt = _system_prompt()
             if sys_prompt:
                 msgs = data.get("messages", [])
                 sys_msg = next((m for m in msgs if isinstance(m, dict) and m.get("role") == "system"), None)
@@ -66,7 +60,6 @@ class InjectToolsCallback(CustomLogger):
                 else:
                     msgs.insert(0, {"role": "system", "content": sys_prompt})
                 data["messages"] = msgs
-            log.info("Messages %s", msgs)
             return data
 
         # Only inject for Responses API
@@ -93,15 +86,10 @@ class InjectToolsCallback(CustomLogger):
                 "server_url": mcp_url,
                 "require_approval": "never"
             })
-            log.info("Added mcp tool server_url=%s", mcp_url)
 
         if tools:
             data["tools"] = tools
             data.setdefault("tool_choice", "auto")
-
-        log.info("Injected for responses: %s", json.dumps(
-            {"types": [t.get("type") for t in tools], "tool_choice": data.get("tool_choice")}
-        ))
 
         return data
 
